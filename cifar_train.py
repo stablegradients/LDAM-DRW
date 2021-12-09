@@ -348,8 +348,8 @@ def validate(val_loader, model, criterion, epoch, args, log=None, tf_writer=None
         tp_and_fp = cf.sum(0)
         tp = cf.diagonal()
 
-        precision = tp / tp_and_fp
-        recall = tp / tp_and_fn
+        precision = tp / (tp_and_fp + 0.001)
+        recall = tp / (tp_and_fn + 0.001)
         cls_cnt = cf.sum(axis=1)
         cls_hit = np.diag(cf)
         cls_acc = cls_hit / cls_cnt
