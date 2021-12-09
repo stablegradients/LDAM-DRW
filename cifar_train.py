@@ -343,11 +343,17 @@ def validate(val_loader, model, criterion, epoch, args, log=None, tf_writer=None
                     top1=top1, top5=top5))
                 print(output)
         cf = confusion_matrix(all_targets, all_preds).astype(float)
+        
+        tp_and_fn = cf.sum(1)
+        tp_and_fp = cf.sum(0)
+        tp = cf.diagonal()
+
+        precision = tp / tp_and_fp
+        recall = tp / tp_and_fn
         cls_cnt = cf.sum(axis=1)
         cls_hit = np.diag(cf)
         cls_acc = cls_hit / cls_cnt
-        output = ('{flag} Results: Prec@1 {top1.avg:.3f} Prec@5 {top5.avg:.3f} Loss {loss.avg:.5f}'
-                .format(flag=flag, top1=top1, top5=top5, loss=losses))
+        output = ('{flag} Results: Prec@1 {top1.avg:.3f} Prec@5 {top5.avg:.3f} Loss {loss.avg:.5f} mean precision {precision.avg:.3f} mean recall {recall.avg:.3f} min precision {precision.min} min recall {recall.min}'.format(flag=flag, top1=top1, top5=top5, loss=losses, precision=precision, recall=recall))
         out_cls_acc = '%s Class Accuracy: %s'%(flag,(np.array2string(cls_acc, separator=',', formatter={'float_kind':lambda x: "%.3f" % x})))
         print(output)
         print(out_cls_acc)
