@@ -374,23 +374,15 @@ def adjust_learning_rate(optimizer, epoch, args):
     epoch = epoch + 1
     if epoch <= 5:
         lr = args.lr * epoch / 5
-    elif epoch > 220:
-        lr = args.lr * 0.0001
     elif epoch > 180:
-        lr = args.lr * 0.001
+        lr = args.lr * 0.0001
     elif epoch > 160:
         lr = args.lr * 0.01
-    elif epoch > 100:
-        lr = args.lr * 0.1
     else:
         lr = args.lr
-    if epoch in [96, 192, 224]:
-        weight_decay = args.weight_decay
-    else:
-        weight_decay = 0
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
-        param_group['weight_decay'] = weight_decay
+
 
 if __name__ == '__main__':
     main()
