@@ -353,7 +353,7 @@ def validate(val_loader, model, criterion, epoch, args, log=None, tf_writer=None
         cls_cnt = cf.sum(axis=1)
         cls_hit = np.diag(cf)
         cls_acc = cls_hit / cls_cnt
-        output = ('{flag} Results: Prec@1 {top1.avg:.3f} Prec@5 {top5.avg:.3f} Loss {loss.avg:.5f} mean precision {precision.avg:.3f} mean recall {recall.avg:.3f} min precision {precision.min} min recall {recall.min}'.format(flag=flag, top1=top1, top5=top5, loss=losses, precision=precision, recall=recall))
+        output = ('{flag} Results: Prec@1 {top1.avg:.3f} Prec@5 {top5.avg:.3f} Loss {loss.avg:.5f} mean precision {precision_avg:.3f} mean recall {recall_avg:.3f} min precision {precision_min} min recall {recall_min}'.format(flag=flag, top1=top1, top5=top5, loss=losses, precision_avg=np.mean(precision), recall_avg=np.mean(recall), recall_min=np.min(recall), precision_min=np.min(precision)))
         out_cls_acc = '%s Class Accuracy: %s'%(flag,(np.array2string(cls_acc, separator=',', formatter={'float_kind':lambda x: "%.3f" % x})))
         print(output)
         print(out_cls_acc)
