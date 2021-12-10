@@ -19,7 +19,7 @@ from tensorboardX import SummaryWriter
 from sklearn.metrics import confusion_matrix
 from utils import *
 from imbalance_cifar import IMBALANCECIFAR10, IMBALANCECIFAR100
-from losses import LDAMLoss, FocalLoss
+from losses import LDAMLoss, FocalLoss, LogitAdjustedLoss
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
@@ -213,6 +213,9 @@ def main_worker(gpu, ngpus_per_node, args):
             criterion = LDAMLoss(cls_num_list=cls_num_list, max_m=0.5, s=30, weight=per_cls_weights).cuda(args.gpu)
         elif args.loss_type == 'Focal':
             criterion = FocalLoss(weight=per_cls_weights, gamma=1).cuda(args.gpu)
+        elif args.loss_type == 'LA':
+            priori = np.array(train_dataset.get_cls_num_list())
+            criterion = LogitAdjustedLoss(priori=priori)
         else:
             warnings.warn('Loss type is not listed')
             return
@@ -303,7 +306,7 @@ def validate(val_loader, model, criterion, epoch, args, log=None, tf_writer=None
     losses = AverageMeter('Loss', ':.4e')
     top1 = AverageMeter('Acc@1', ':6.2f')
     top5 = AverageMeter('Acc@5', ':6.2f')
-    
+
     # switch to evaluate mode
     model.eval()
     all_preds = []
@@ -343,7 +346,7 @@ def validate(val_loader, model, criterion, epoch, args, log=None, tf_writer=None
                     top1=top1, top5=top5))
                 print(output)
         cf = confusion_matrix(all_targets, all_preds).astype(float)
-        
+
         tp_and_fn = cf.sum(1)
         tp_and_fp = cf.sum(0)
         tp = cf.diagonal()
@@ -372,17 +375,19 @@ def validate(val_loader, model, criterion, epoch, args, log=None, tf_writer=None
 def adjust_learning_rate(optimizer, epoch, args):
     """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
     epoch = epoch + 1
-    if epoch <= 5:
-        lr = args.lr * epoch / 5
-    elif epoch > 180:
+    if epoch <= 20:
+        pass
+    elif epoch > 1100:
+        lr = args.lr * 0.001
+    elif epoch > 920:
         lr = args.lr * 0.01
-    elif epoch > 160:
+    elif epoch > 604:
         lr = args.lr * 0.1
     else:
         lr = args.lr
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
-
+        
 
 if __name__ == '__main__':
     main()
