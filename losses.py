@@ -43,3 +43,18 @@ class LDAMLoss(nn.Module):
     
         output = torch.where(index, x_m, x)
         return F.cross_entropy(self.s*output, target, weight=self.weight)
+    
+class LogitAdjustedLoss(torch.nn.Module):
+    def __init__(self, priori, temp=0.5, epsilon=0.001):
+        super().__init__()
+        # here we make sure that there is a non zero priori for even 
+        # those classes which happen to have zero samples (by mistake)
+        self.epsilon = epsilon
+        self.priori = (priori + epsilon)/torch.sum(priori + epsilon)
+        self.temp = temp
+        self.priori.requires_grad = False
+        self.CrossEntropyLoss = torch.nn.CrossEntropyLoss()
+    def forward(self, x, y):
+        x_logit_adjusted = x - self.temp * torch.log(self.priori)
+        loss = self.CrossEntropyLoss(x_logit_adjusted, y)
+        return loss
