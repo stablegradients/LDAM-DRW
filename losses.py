@@ -50,7 +50,7 @@ class LogitAdjustedLoss(torch.nn.Module):
         # here we make sure that there is a non zero priori for even 
         # those classes which happen to have zero samples (by mistake)
         self.epsilon = epsilon
-        self.priori = torch.Tensor(priori) + self.epsilon
+        self.priori = torch.Tensor(priori).cuda() + self.epsilon
         self.priori.requires_grad = False
         self.temp = temp
         self.CrossEntropyLoss = torch.nn.CrossEntropyLoss()
