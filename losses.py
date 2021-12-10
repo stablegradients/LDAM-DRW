@@ -54,6 +54,9 @@ class LogitAdjustedLoss(torch.nn.Module):
         self.priori.requires_grad = False
         self.temp = temp
         self.CrossEntropyLoss = torch.nn.CrossEntropyLoss()
+    def cuda(self):
+        super().cuda()
+        self.priori.cuda()
     def forward(self, x, y):
         x_logit_adjusted = x - self.temp * torch.log(self.priori)
         loss = self.CrossEntropyLoss(x_logit_adjusted, y)
