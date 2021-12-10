@@ -40,10 +40,10 @@ class LDAMLoss(nn.Module):
         batch_m = torch.matmul(self.m_list[None, :], index_float.transpose(0,1))
         batch_m = batch_m.view((-1, 1))
         x_m = x - batch_m
-    
+
         output = torch.where(index, x_m, x)
         return F.cross_entropy(self.s*output, target, weight=self.weight)
-    
+
 class LogitAdjustedLoss(torch.nn.Module):
     def __init__(self, priori, temp=0.5, epsilon=0.001):
         super().__init__()
